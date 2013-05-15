@@ -108,20 +108,31 @@ module.provider('Restangular', function() {
         this.setListTypeIsArray = function(val) {
             listTypeIsArray = val;
         };
-        
+
         /**
          * This lets you set a suffix to every request.
-         * 
+         *
          * For example, if your api requires that for JSon requests you do /users/123.json, you can set that
          * in here.
-         * 
-         * 
+         *
+         *
          * By default, the suffix is null
          */
         var suffix = null;
         this.setRequestSuffix = function(newSuffix) {
             suffix = newSuffix;
         }
+
+        /**
+         * Sets the prototype for the resources of a specific route.
+         * This allows you to easily add convenience methods and
+         * getters/setters.
+         */
+        var inheritsFrom = {};
+        this.setInheritsFrom = function(route, parent) {
+            inheritsFrom[route] = parent;
+        }
+
         //Internal values and functions
         var urlCreatorFactory = {};
 
@@ -288,7 +299,11 @@ module.provider('Restangular', function() {
               //RequestLess connection
               localElem.one = _.bind(one, localElem, localElem);
               localElem.all = _.bind(all, localElem, localElem);
-              
+
+              if (!_.isUndefined(inheritsFrom[route])) {
+                  _.extend(localElem, inheritsFrom[route]);
+              }
+
               addCustomOperation(localElem);
               return onElemRestangularized(localElem, false, route);
           }
